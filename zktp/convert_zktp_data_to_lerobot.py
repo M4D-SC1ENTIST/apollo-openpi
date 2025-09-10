@@ -6,7 +6,7 @@ This script converts the custom ZKTP dataset format to LeRobot format for fine-t
 joint positions/commands, and gripper states/commands.
 
 Usage:
-uv run zktp/convert_zktp_data_to_lerobot.py --data_dir datasets/raw_dataset
+uv run zktp/convert_zktp_data_to_lerobot.py --data_dir datasets/raw_data
 
 The resulting dataset will be saved to datasets/zktp_lerobot_dataset.
 """
@@ -27,12 +27,11 @@ REPO_NAME = "zktp_lerobot_dataset"  # Name of the output dataset
 
 def load_episode_data(episode_dir: Path):
     """Load episode data from the ZKTP format."""
-    # Find the JSON file in the episode directory
-    json_files = list(episode_dir.glob("*.json"))
-    if len(json_files) != 1:
-        raise ValueError(f"Expected exactly one JSON file in {episode_dir}, found {len(json_files)}")
+    # The JSON file is always called session_data.json
+    json_file = episode_dir / "session_data.json"
+    if not json_file.exists():
+        raise ValueError(f"Expected session_data.json in {episode_dir}, but file not found")
     
-    json_file = json_files[0]
     with open(json_file, 'r') as f:
         episode_data = json.load(f)
     
@@ -45,16 +44,8 @@ def get_rgb_image_path(motion_step, episode_dir: Path):
     # Remove the prefix path and get the actual image filename
     image_filename = Path(rgb_path).name
     
-    # Find the subfolder (it's the UUID part without the task suffix)
-    json_files = list(episode_dir.glob("*.json"))
-    json_name = json_files[0].stem
-    # Extract the UUID part (everything before "_open" or similar task identifier)
-    # The format is: 6aebd020-327a-415f-847d-c621c624ded2_open_the_bottle
-    if '_' in json_name:
-        uuid_part = json_name.split('_')[0]
-    else:
-        uuid_part = json_name
-    subfolder = episode_dir / uuid_part
+    # The image subfolder is always called motion_images
+    subfolder = episode_dir / "motion_images"
     
     full_image_path = subfolder / image_filename
     return full_image_path
@@ -112,8 +103,8 @@ def main(data_dir: str):
         image_writer_processes=5,
     )
     
-    # Process each episode
-    episode_dirs = sorted([d for d in data_path.iterdir() if d.is_dir()])
+    # Process each episode (looking for run_000, run_001, etc.)
+    episode_dirs = sorted([d for d in data_path.iterdir() if d.is_dir() and d.name.startswith("run_")])
     
     for episode_dir in episode_dirs:
         print(f"Processing episode: {episode_dir.name}")
@@ -182,7 +173,7 @@ def main(data_dir: str):
             continue
     
     print(f"Dataset conversion complete. Saved to: {output_path}")
-    print(f"Total episodes processed: {len([d for d in data_path.iterdir() if d.is_dir()])}")
+    print(f"Total episodes processed: {len(episode_dirs)}")
 
 
 if __name__ == "__main__":
