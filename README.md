@@ -9,6 +9,10 @@ This was modified based on openpi.
     ```
 
 # Dataset Conversion
+- Download the dataset
+    ```
+    uv run prepare_dataset.py
+    ```
 - Convert the raw dataset from ZKTP
     ```bash
     uv run zktp/convert_zktp_data_to_lerobot.py --data_dir datasets/raw_dataset
