@@ -15,7 +15,7 @@ This was modified based on openpi.
     ```
 - Convert the raw dataset from ZKTP
     ```bash
-    uv run zktp/convert_zktp_data_to_lerobot.py --data_dir datasets/raw_dataset
+    uv run zktp/convert_zktp_data_to_lerobot.py --data_dir datasets/raw_data
     ```
     
 - Check if the dataset looks correct by randomly sampling one episode

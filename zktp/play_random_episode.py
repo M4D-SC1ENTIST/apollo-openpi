@@ -15,6 +15,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+import json
 
 
 def play_random_episode(dataset_path: str = "datasets/zktp_lerobot_dataset"):
@@ -37,31 +38,41 @@ def play_random_episode(dataset_path: str = "datasets/zktp_lerobot_dataset"):
     print(f"  Total episodes: {dataset.num_episodes}")
     print(f"  Features: {list(dataset.features.keys())}")
     
+    # Load episode lengths from meta/episodes.jsonl
+    episodes_meta_path = dataset_path / "meta" / "episodes.jsonl"
+    episode_lengths = []
+    episode_tasks = []
+    with open(episodes_meta_path, 'r') as f:
+        for line in f:
+            episode_data = json.loads(line)
+            episode_lengths.append(episode_data['length'])
+            episode_tasks.append(episode_data['tasks'][0] if episode_data['tasks'] else "Unknown task")
+    
+    # Compute cumulative lengths to get start indices
+    cumulative_lengths = [0] + list(np.cumsum(episode_lengths))
+    
     # Sample a random episode by checking episode indices
     episode_idx = random.randint(0, dataset.num_episodes - 1)
     
     print(f"\nPlaying episode {episode_idx}")
     
-    # Get all data and filter by episode index
-    episode_frames = []
-    for i in range(len(dataset)):
-        frame = dataset[i]
-        if frame['episode_index'] == episode_idx:
-            episode_frames.append(frame)
+    # Get episode start and end indices
+    start_idx = cumulative_lengths[episode_idx]
+    end_idx = cumulative_lengths[episode_idx + 1]
+    episode_length = episode_lengths[episode_idx]
     
-    episode_length = len(episode_frames)
+    # Load all frames for the episode
+    episode_frames = [dataset[i] for i in range(start_idx, end_idx)]
+    
     print(f"Episode length: {episode_length} frames")
     
-    # Extract task description if available
-    if len(episode_frames) > 0 and 'task' in episode_frames[0]:
-        task = episode_frames[0]['task'] if episode_frames[0]['task'] else "Unknown task"
-        print(f"Task: {task}")
-    else:
-        task = "Unknown task"
+    # Extract task description
+    task = episode_tasks[episode_idx]
+    print(f"Task: {task}")
     # Setup matplotlib for interactive display
     plt.ion()
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    fig.suptitle(f'Episode {episode_idx}: {task if "task" in locals() else "ZKTP Dataset"}', fontsize=14)
+    fig.suptitle(f'Episode {episode_idx}: {task}', fontsize=14)
     
     # Axes layout: [image, state plot], [action plot, gripper plot]
     img_ax = axes[0, 0]
