@@ -20,33 +20,25 @@ This was modified based on openpi.
     ```
  
  # Training
- - pi0 full fine-tuning
+ - pi0 fine-tuning
     ```
     uv run scripts/compute_norm_stats.py --config-name pi0_zktp
 
-    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_zktp --exp-name=zktp-pi0-full --overwrite
+    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_zktp --exp-name=zktp-pi0 --overwrite
     ```
 
-- pi0-fast full fine-tuning
+- pi0-fast fine-tuning
     ```
     uv run scripts/compute_norm_stats.py --config-name pi0_fast_zktp
 
-    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_fast_zktp --exp-name=zktp-pi0-fast-full --overwrite
+    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_fast_zktp --exp-name=zktp-pi0-fast --overwrite
 
     ```
 
-- pi0 LoRA fine-tuning
+- pi0.5 fine-tuning
     ```
-    uv run scripts/compute_norm_stats.py --config-name pi0_zktp_low_mem_finetune
+    uv run scripts/compute_norm_stats.py --config-name pi05_zktp
 
-    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_zktp_low_mem_finetune --exp-name=zktp-pi0-lora --overwrite
-    ```
-
-- pi0-fast LoRA fine-tuning
-
-    ```
-    uv run scripts/compute_norm_stats.py --config-name pi0_fast_zktp_low_mem_finetune
-
-    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi0_fast_zktp_low_mem_finetune --exp-name=zktp-pi0-fast-lora --overwrite
+    XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi05_zktp --exp-name=zktp-pi05 --overwrite
     ```
 
